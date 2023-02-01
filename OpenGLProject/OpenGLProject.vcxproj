@@ -21,10 +21,16 @@
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="Src\Engine.cpp" />
+    <ClCompile Include="Src\ModelInputs.cpp" />
+    <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\Source.cpp" />
+    <ClCompile Include="Src\VertexArray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.hpp" />
+    <ClInclude Include="Headers\ModelInputs.hpp" />
+    <ClInclude Include="Headers\Shader.hpp" />
+    <ClInclude Include="Headers\VertexArray.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -113,7 +119,6 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)GLFW\include;$(ProjectDir)glad\include;$(ProjectDir)Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -133,7 +138,6 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)GLFW\include;$(ProjectDir)glad\include;$(ProjectDir)Headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
