@@ -60,6 +60,10 @@ ShaderProgram& ShaderProgram::AttachShader(std::uint32_t shaderID) noexcept {
 	return *this;
 }
 
+std::int32_t ShaderProgram::GetUniformLocation(const char* variableName) const noexcept {
+	return glGetUniformLocation(m_programID, variableName);
+}
+
 void ShaderProgram::LinkProgram() const noexcept {
 	glLinkProgram(m_programID);
 }

@@ -35,6 +35,8 @@ public:
 
 	[[nodiscard]]
 	ShaderProgram& AttachShader(std::uint32_t shaderID) noexcept;
+	[[nodiscard]]
+	std::int32_t GetUniformLocation(const char* variableName) const noexcept;
 
 	void LinkProgram() const noexcept;
 	void BindShaderProgram() noexcept;
