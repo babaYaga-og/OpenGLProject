@@ -1,6 +1,8 @@
 #ifndef SHADER_HPP_
 #define SHADER_HPP_
 #include <cstdint>
+#include <string>
+#include <vector>
 
 enum class ShaderType {
 	Fragment,
@@ -9,11 +11,18 @@ enum class ShaderType {
 
 class Shader {
 public:
-	Shader(const char* shaderSrc, ShaderType type) noexcept;
+	Shader() noexcept;
 	~Shader() noexcept;
+
+	void CreateShader(const char* shaderSrc, ShaderType type) noexcept;
+	void CreateShader(const std::wstring& fileName, ShaderType type);
 
 	[[nodiscard]]
 	std::uint32_t GetShaderID() const noexcept;
+
+private:
+	[[nodiscard]]
+	std::vector<char> LoadText(const std::wstring& fileName);
 
 private:
 	std::uint32_t m_shaderID;

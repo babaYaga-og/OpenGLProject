@@ -1,8 +1,16 @@
 #include <Shader.hpp>
+#include <fstream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-Shader::Shader(const char* shaderSrc, ShaderType type) noexcept : m_shaderID{ 0u } {
+Shader::Shader() noexcept : m_shaderID{ 0u } {}
+
+Shader::~Shader() noexcept {
+	glDeleteShader(m_shaderID);
+}
+
+void Shader::CreateShader(const char* shaderSrc, ShaderType type) noexcept {
 	switch (type) {
 	case ShaderType::Fragment: {
 		m_shaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -18,8 +26,21 @@ Shader::Shader(const char* shaderSrc, ShaderType type) noexcept : m_shaderID{ 0u
 	glCompileShader(m_shaderID);
 }
 
-Shader::~Shader() noexcept {
-	glDeleteShader(m_shaderID);
+void Shader::CreateShader(const std::wstring& fileName, ShaderType type) {
+	std::vector<char> shaderCode = LoadText(fileName);
+	CreateShader(std::data(shaderCode), type);
+}
+
+std::vector<char> Shader::LoadText(const std::wstring& fileName) {
+	std::ifstream shader(fileName.c_str(), std::ios_base::ate);
+
+	const size_t shaderSize = static_cast<size_t>(shader.tellg());
+	shader.seekg(0u);
+
+	std::vector<char> byteCode(shaderSize);
+	shader.read(std::data(byteCode), static_cast<std::streamsize>(shaderSize));
+
+	return byteCode;
 }
 
 std::uint32_t Shader::GetShaderID() const noexcept {

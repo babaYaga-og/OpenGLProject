@@ -1,18 +1,5 @@
 #include <Engine.hpp>
 
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-"}\n\0";
-
 Engine::Engine(int width, int height, const char* windowTitle)
 	: m_windowHandle{ nullptr }, m_sphereIndices{ 0 } {
 	InitOpenGL(width, height, windowTitle);
@@ -20,9 +7,11 @@ Engine::Engine(int width, int height, const char* windowTitle)
 	m_shaderProgram = std::make_unique<ShaderProgram>();
 	{
 		// Vertex Shader
-		Shader vertexShader{ vertexShaderSource, ShaderType::Vertex };
+		Shader vertexShader{};
+		vertexShader.CreateShader(L"shaders/VertexShader.vert", ShaderType::Vertex);
 		// Fragment Shader
-		Shader fragmentShader{ fragmentShaderSource, ShaderType::Fragment };
+		Shader fragmentShader{};
+		fragmentShader.CreateShader(L"shaders/FragmentShader.frag", ShaderType::Fragment);
 
 		m_shaderProgram->AttachShader(vertexShader.GetShaderID())
 			.AttachShader(fragmentShader.GetShaderID()).LinkProgram();
