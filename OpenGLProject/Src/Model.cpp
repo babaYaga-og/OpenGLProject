@@ -1,4 +1,5 @@
 #include <Model.hpp>
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -41,4 +42,54 @@ void Model::Draw() noexcept {
 	glUniformMatrix4fv(m_matrixIndex, 1u, GL_FALSE, m_modelMatrix.m[0]);
 
 	glDrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, 0);
+}
+
+void Model::PhysicsUpdate() noexcept {}
+
+// Orbital Model
+OrbitingModel::OrbitingModel() noexcept
+	: m_angle{ 0.f }, m_radius{ 0.f }, m_modelDirectionX{ 0.f }, m_modelDirectionY{ 0.f },
+	m_speedModifier{ 0.05f } {}
+
+void OrbitingModel::PhysicsUpdate() noexcept {
+	const DirectX::XMFLOAT3 offset = GetAngularOffset();
+	m_modelOffset = offset;
+
+	m_angle += m_speedModifier;
+	if (m_angle > DirectX::XM_2PI)
+		m_angle = 0.f;
+}
+
+void OrbitingModel::SetSpeedModifier(float speed) noexcept {
+	m_speedModifier = speed;
+}
+
+void OrbitingModel::MeasureRadius() noexcept {
+	const DirectX::XMFLOAT3& modelLocation = m_modelOffset;
+	m_radius = std::sqrt(
+		std::pow(modelLocation.x, 2.f) + std::pow(modelLocation.y, 2.f) +
+		std::pow(modelLocation.z, 2.f)
+	);
+
+	// Direction of X and Y decides the orbit direction
+	m_modelDirectionX = modelLocation.x / m_radius;
+	m_modelDirectionY = modelLocation.y / m_radius;
+}
+
+// Orbit ClockWise
+DirectX::XMFLOAT3 OrbitModelClock::GetAngularOffset() noexcept {
+	return {
+		m_modelDirectionX * std::sin(m_angle) * m_radius,
+		m_modelDirectionY * std::sin(m_angle) * m_radius,
+		std::cos(m_angle) * m_radius
+	};
+}
+
+// Orbit Anti-Clockwise
+DirectX::XMFLOAT3 OrbitModelAntiClock::GetAngularOffset() noexcept {
+	return {
+		m_modelDirectionX * std::cos(m_angle) * m_radius,
+		m_modelDirectionY * std::cos(m_angle) * m_radius,
+		std::sin(m_angle) * m_radius
+	};
 }

@@ -2,6 +2,7 @@
 #define ENGINE_HPP_
 #include <memory>
 #include <vector>
+#include <TimeManager.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <Shader.hpp>
@@ -17,7 +18,7 @@ public:
 
 private:
 	void InitOpenGL(int width, int height, const char* windowTitle);
-	void processInput(GLFWwindow* window) const noexcept;
+	void processInput(GLFWwindow* window) noexcept;
 	void SetCamera(int width, int height) noexcept;
 	void BindCameraBuffer() noexcept;
 
@@ -32,5 +33,7 @@ private:
 	DirectX::XMFLOAT4X4 m_projectionMatrix;
 	std::int32_t m_viewMatrixIndex;
 	std::int32_t m_projectionMatrixIndex;
+	FrameTime m_frameTime;
+	bool m_cameraTopDown;
 };
 #endif

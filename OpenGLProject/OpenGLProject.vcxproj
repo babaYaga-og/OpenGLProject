@@ -26,6 +26,7 @@
     <ClCompile Include="Src\ModelInputs.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\Source.cpp" />
+    <ClCompile Include="Src\TimeManager.cpp" />
     <ClCompile Include="Src\VertexArray.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +35,7 @@
     <ClInclude Include="Headers\Model.hpp" />
     <ClInclude Include="Headers\ModelInputs.hpp" />
     <ClInclude Include="Headers\Shader.hpp" />
+    <ClInclude Include="Headers\TimeManager.hpp" />
     <ClInclude Include="Headers\VertexArray.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

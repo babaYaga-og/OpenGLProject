@@ -6,7 +6,8 @@ class Camera {
 public:
 	Camera() noexcept;
 
-	void SetCameraPosition(const DirectX::XMFLOAT3& cameraPostion) noexcept;
+	void Set3DPersonView() noexcept;
+	void SetTopDownView() noexcept;
 
 	[[nodiscard]]
 	DirectX::XMMATRIX GetViewMatrix() const noexcept;
@@ -15,5 +16,6 @@ public:
 
 private:
 	DirectX::XMVECTOR m_cameraPosition;
+	DirectX::XMVECTOR m_focusDirection;
 };
 #endif

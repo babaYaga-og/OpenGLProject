@@ -3,7 +3,7 @@
 
 Engine::Engine(int width, int height, const char* windowTitle)
 	: m_windowHandle{ nullptr }, m_viewMatrix{}, m_viewMatrixIndex{ 0 }, m_projectionMatrix{},
-	m_projectionMatrixIndex{ 0 } {
+	m_projectionMatrixIndex{ 0 }, m_cameraTopDown{ false } {
 	InitOpenGL(width, height, windowTitle);
 
 	m_shaderProgram = std::make_unique<ShaderProgram>();
@@ -25,21 +25,92 @@ Engine::Engine(int width, int height, const char* windowTitle)
 	sphereInput.InitData();
 	const std::int32_t sphereIndexCount = sphereInput.GetIndexCount();
 
-	auto sphere0 = std::make_unique<Model>();
-	sphere0->SetIndexCount(sphereIndexCount);
-	sphere0->SetBufferIndices(m_shaderProgram.get());
-	sphere0->SetModelColour(DirectX::Colors::Tomato);
-	sphere0->SetModelScale(0.2f);
-	sphere0->SetModelOffset({ -1.9f, 0.f, 0.f });
-	m_models.emplace_back(std::move(sphere0));
+	auto sun = std::make_unique<Model>();
+	sun->SetIndexCount(sphereIndexCount);
+	sun->SetBufferIndices(m_shaderProgram.get());
+	sun->SetModelColour(DirectX::Colors::OrangeRed);
+	sun->SetModelScale(0.1f);
+	m_models.emplace_back(std::move(sun));
 
-	auto sphere1 = std::make_unique<Model>();
-	sphere1->SetIndexCount(sphereIndexCount);
-	sphere1->SetBufferIndices(m_shaderProgram.get());
-	sphere1->SetModelColour(DirectX::Colors::Crimson);
-	sphere1->SetModelScale(0.2f);
-	sphere1->SetModelOffset({ 1.9f, 0.f, 0.f });
-	m_models.emplace_back(std::move(sphere1));
+	auto mercury = std::make_unique<OrbitModelClock>();
+	mercury->SetIndexCount(sphereIndexCount);
+	mercury->SetBufferIndices(m_shaderProgram.get());
+	mercury->SetModelColour(DirectX::Colors::SlateGray);
+	mercury->SetModelScale(0.02f);
+	mercury->SetModelOffset({ 7.f, 0.f, 0.f });
+	mercury->MeasureRadius();
+	mercury->SetSpeedModifier(0.107f);
+	m_models.emplace_back(std::move(mercury));
+
+	auto venus = std::make_unique<OrbitModelClock>();
+	venus->SetIndexCount(sphereIndexCount);
+	venus->SetBufferIndices(m_shaderProgram.get());
+	venus->SetModelColour(DirectX::Colors::LightYellow);
+	venus->SetModelScale(0.03f);
+	venus->SetModelOffset({ 7.f, 0.f, 0.f });
+	venus->MeasureRadius();
+	venus->SetSpeedModifier(0.0783f);
+	m_models.emplace_back(std::move(venus));
+
+	auto earth = std::make_unique<OrbitModelClock>();
+	earth->SetIndexCount(sphereIndexCount);
+	earth->SetBufferIndices(m_shaderProgram.get());
+	earth->SetModelColour(DirectX::Colors::RoyalBlue);
+	earth->SetModelScale(0.035f);
+	earth->SetModelOffset({ 8.f, 0.f, 0.f });
+	earth->MeasureRadius();
+	earth->SetSpeedModifier(0.0666f);
+	m_models.emplace_back(std::move(earth));
+
+	auto mars = std::make_unique<OrbitModelClock>();
+	mars->SetIndexCount(sphereIndexCount);
+	mars->SetBufferIndices(m_shaderProgram.get());
+	mars->SetModelColour(DirectX::Colors::IndianRed);
+	mars->SetModelScale(0.028f);
+	mars->SetModelOffset({ 13.f, 0.f, 0.f });
+	mars->MeasureRadius();
+	mars->SetSpeedModifier(0.0539f);
+	m_models.emplace_back(std::move(mars));
+
+	auto jupiter = std::make_unique<OrbitModelClock>();
+	jupiter->SetIndexCount(sphereIndexCount);
+	jupiter->SetBufferIndices(m_shaderProgram.get());
+	jupiter->SetModelColour(DirectX::Colors::SandyBrown);
+	jupiter->SetModelScale(0.06f);
+	jupiter->SetModelOffset({ 8.5f, 0.f, 0.f });
+	jupiter->MeasureRadius();
+	jupiter->SetSpeedModifier(0.0292f);
+	m_models.emplace_back(std::move(jupiter));
+
+	auto saturn = std::make_unique<OrbitModelClock>();
+	saturn->SetIndexCount(sphereIndexCount);
+	saturn->SetBufferIndices(m_shaderProgram.get());
+	saturn->SetModelColour(DirectX::Colors::AntiqueWhite);
+	saturn->SetModelScale(0.055f);
+	saturn->SetModelOffset({ 11.5f, 0.f, 0.f });
+	saturn->MeasureRadius();
+	saturn->SetSpeedModifier(0.0216f);
+	m_models.emplace_back(std::move(saturn));
+
+	auto uranus = std::make_unique<OrbitModelClock>();
+	uranus->SetIndexCount(sphereIndexCount);
+	uranus->SetBufferIndices(m_shaderProgram.get());
+	uranus->SetModelColour(DirectX::Colors::LightCyan);
+	uranus->SetModelScale(0.04f);
+	uranus->SetModelOffset({ 18.5f, 0.f, 0.f });
+	uranus->MeasureRadius();
+	uranus->SetSpeedModifier(0.0152f);
+	m_models.emplace_back(std::move(uranus));
+
+	auto neptune = std::make_unique<OrbitModelClock>();
+	neptune->SetIndexCount(sphereIndexCount);
+	neptune->SetBufferIndices(m_shaderProgram.get());
+	neptune->SetModelColour(DirectX::Colors::DeepSkyBlue);
+	neptune->SetModelScale(0.038f);
+	neptune->SetModelOffset({ 21.5f, 0.f, 0.f });
+	neptune->MeasureRadius();
+	neptune->SetSpeedModifier(0.0121f);
+	m_models.emplace_back(std::move(neptune));
 
 	m_vertexArray = std::make_unique<VertexArray>();
 	m_vertexArray->AddVertexBuffer(sphereInput.GetVertexData())
@@ -51,22 +122,43 @@ Engine::~Engine() noexcept {
 }
 
 void Engine::Run() {
+	float accumulatedElaspedTime = 0.f;
+
 	while (!glfwWindowShouldClose(m_windowHandle)) {
+		m_frameTime.StartTimer();
+
 		processInput(m_windowHandle);
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_shaderProgram->BindShaderProgram();
 		m_vertexArray->BindVertexArray();
 
 		BindCameraBuffer();
 
+		const float deltaTime = m_frameTime.GetDeltaTime();
+		const float updateDelta = m_frameTime.GetGraphicsUpdateDelta();
+		if (accumulatedElaspedTime >= updateDelta) {
+			while (accumulatedElaspedTime >= updateDelta) {
+				for (auto& model : m_models)
+					model->PhysicsUpdate();
+
+				accumulatedElaspedTime -= updateDelta;
+			}
+
+			accumulatedElaspedTime = 0.f;
+		}
+		else
+			accumulatedElaspedTime += deltaTime;
+
 		for (auto& model : m_models)
 			model->Draw();
 
 		glfwSwapBuffers(m_windowHandle);
 		glfwPollEvents();
+
+		m_frameTime.EndTimer();
 	}
 }
 
@@ -81,11 +173,24 @@ void Engine::InitOpenGL(int width, int height, const char* windowTitle) {
 	glfwSetFramebufferSizeCallback(m_windowHandle, framebuffer_size_callback);
 
 	gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 }
 
-void Engine::processInput(GLFWwindow* window) const noexcept {
+void Engine::processInput(GLFWwindow* window) noexcept {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+		Camera camera{};
+		if (m_cameraTopDown)
+			camera.Set3DPersonView();
+		else
+			camera.SetTopDownView();
+
+		m_cameraTopDown = !m_cameraTopDown;
+		DirectX::XMStoreFloat4x4(&m_viewMatrix, camera.GetViewMatrix());
+	}
 }
 
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
