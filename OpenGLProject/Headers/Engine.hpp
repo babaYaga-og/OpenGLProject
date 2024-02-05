@@ -5,6 +5,7 @@
 #include <TimeManager.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+//#include "glm.hpp"
 #include <Shader.hpp>
 #include <VertexArray.hpp>
 #include <Model.hpp>
@@ -30,10 +31,14 @@ private:
 	std::unique_ptr<VertexArray> m_vertexArray;
 	std::vector<std::unique_ptr<Model>> m_models;
 	DirectX::XMFLOAT4X4 m_viewMatrix;
+	//glm::mat4 m_viewMat;
 	DirectX::XMFLOAT4X4 m_projectionMatrix;
+	//glm::mat4 m_VP;
+	std::int32_t m_VPMatrixIndex;
 	std::int32_t m_viewMatrixIndex;
 	std::int32_t m_projectionMatrixIndex;
 	FrameTime m_frameTime;
 	bool m_cameraTopDown;
+	bool m_camera3D;
 };
 #endif

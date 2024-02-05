@@ -1,9 +1,20 @@
+#include <iostream>
+
 #include <Engine.hpp>
 #include <Camera.hpp>
 
+
 Engine::Engine(int width, int height, const char* windowTitle)
-	: m_windowHandle{ nullptr }, m_viewMatrix{}, m_viewMatrixIndex{ 0 }, m_projectionMatrix{},
-	m_projectionMatrixIndex{ 0 }, m_cameraTopDown{ false } {
+	:
+	m_windowHandle{ nullptr },
+	m_viewMatrix{},
+	m_viewMatrixIndex{ 0 },
+	m_projectionMatrix{},
+	m_projectionMatrixIndex{ 0 },
+	m_cameraTopDown{ false },
+	m_camera3D{ true }
+{
+
 	InitOpenGL(width, height, windowTitle);
 
 	m_shaderProgram = std::make_unique<ShaderProgram>();
@@ -16,14 +27,19 @@ Engine::Engine(int width, int height, const char* windowTitle)
 		fragmentShader.CreateShader(L"shaders/FragmentShader.frag", ShaderType::Fragment);
 
 		m_shaderProgram->AttachShader(vertexShader.GetShaderID())
-			.AttachShader(fragmentShader.GetShaderID()).LinkProgram();
+			.AttachShader(fragmentShader.GetShaderID())  // method chaining
+			.LinkProgram();
 	}
+
+	//Camera camera;
 
 	SetCamera(width, height);
 
 	SphereInputs sphereInput{ 64u, 64u };
 	sphereInput.InitData();
 	const std::int32_t sphereIndexCount = sphereInput.GetIndexCount();
+
+
 
 	auto sun = std::make_unique<Model>();
 	sun->SetIndexCount(sphereIndexCount);
@@ -112,9 +128,21 @@ Engine::Engine(int width, int height, const char* windowTitle)
 	neptune->SetSpeedModifier(0.0121f);
 	m_models.emplace_back(std::move(neptune));
 
+	auto pluto = std::make_unique<OrbitModelClock>();
+	pluto->SetIndexCount(sphereIndexCount);
+	pluto->SetBufferIndices(m_shaderProgram.get());
+	pluto->SetModelColour(DirectX::Colors::SandyBrown);
+	pluto->SetModelScale(0.038f * 0.9f);
+	pluto->SetModelOffset({ 28.5f, 0.f, 0.f });
+	pluto->MeasureRadius();
+	pluto->SetSpeedModifier(0.0119f);
+	m_models.emplace_back(std::move(pluto));
+
+
 	m_vertexArray = std::make_unique<VertexArray>();
 	m_vertexArray->AddVertexBuffer(sphereInput.GetVertexData())
-		.AddIndexBuffer(sphereInput.GetIndexData()).AddVertexAttribute();
+		.AddIndexBuffer(sphereInput.GetIndexData())
+		.AddVertexAttribute();
 }
 
 Engine::~Engine() noexcept {
@@ -129,7 +157,7 @@ void Engine::Run() {
 
 		processInput(m_windowHandle);
 
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_shaderProgram->BindShaderProgram();
@@ -158,6 +186,7 @@ void Engine::Run() {
 		glfwSwapBuffers(m_windowHandle);
 		glfwPollEvents();
 
+
 		m_frameTime.EndTimer();
 	}
 }
@@ -179,18 +208,43 @@ void Engine::InitOpenGL(int width, int height, const char* windowTitle) {
 }
 
 void Engine::processInput(GLFWwindow* window) noexcept {
+	static Camera camera1{};
+	camera1.Inputs(m_windowHandle);
+	static bool tabDown = false;
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
-		Camera camera{};
-		if (m_cameraTopDown)
-			camera.Set3DPersonView();
-		else
-			camera.SetTopDownView();
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS) {
+		tabDown = true;
+		if (tabDown) {
+			std::cout << "tab pressed\n";
+			m_cameraTopDown = !m_cameraTopDown;
+			m_camera3D = !m_cameraTopDown;
+		}
+		if (m_cameraTopDown || !m_camera3D) {
+			std::cout << "here\n";
+			camera1.Set3DPersonView();
+			camera1.Inputs(m_windowHandle);
 
-		m_cameraTopDown = !m_cameraTopDown;
-		DirectX::XMStoreFloat4x4(&m_viewMatrix, camera.GetViewMatrix());
+		}
+		else if (m_camera3D || !m_cameraTopDown) {
+			std::cout << "there\n";
+			camera1.SetTopDownView();
+			camera1.Inputs(m_windowHandle);
+		}
+		else {
+		}
+		DirectX::XMStoreFloat4x4(&m_viewMatrix, camera1.GetViewMatrix());
 	}
+
+	if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) {
+
+		std::cout << "keyup\n";
+		//DirectX::XMStoreFloat4x4(&m_viewMatrix, camera1.GetViewMatrix());
+
+	}
+
+	DirectX::XMStoreFloat4x4(&m_viewMatrix, camera1.GetViewMatrix());
 }
 
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -206,6 +260,7 @@ void Engine::SetCamera(int width, int height) noexcept {
 
 	m_viewMatrixIndex = m_shaderProgram->GetUniformLocation("viewMatrix");
 	m_projectionMatrixIndex = m_shaderProgram->GetUniformLocation("projectionMatrix");
+	m_VPMatrixIndex = m_shaderProgram->GetUniformLocation("camMatrix");
 }
 
 void Engine::BindCameraBuffer() noexcept {
