@@ -54,7 +54,7 @@ void Camera::Inputs(GLFWwindow* window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		m_focusDirection += m_camSpeed * XMVector3Normalize(XMVector3Cross(m_focusDirection, m_up));
+		m_cameraPosition += m_camSpeed * XMVector3Normalize(XMVector3Cross(m_focusDirection, m_up));
 		//m_cameraPosition += m_camSpeed * -glm::normalize(glm::cross(m_Orientation, m_Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -63,7 +63,7 @@ void Camera::Inputs(GLFWwindow* window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		m_focusDirection += m_camSpeed * -XMVector3Normalize(XMVector3Cross(m_focusDirection, m_up));
+		m_cameraPosition += m_camSpeed * -XMVector3Normalize(XMVector3Cross(m_focusDirection, m_up));
 		//m_cameraPosition += m_camSpeed * glm::normalize(glm::cross(m_Orientation, m_Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
