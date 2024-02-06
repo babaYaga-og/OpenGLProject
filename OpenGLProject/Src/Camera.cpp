@@ -114,15 +114,15 @@ void Camera::Inputs(GLFWwindow* window)
 		XMVECTOR rad85 = { XMConvertToRadians(89.0f) };
 
 		XMVECTOR normalAxis = XMVector3Normalize(XMVector3Cross(m_focusDirection, m_up));
-
+		XMVECTOR rightAxis = XMVector3Normalize(XMVector3Cross(m_focusDirection, m_right));
 		XMVECTOR quatX = XMQuaternionRotationNormal(normalAxis, angleX);
-		XMVECTOR quatY = XMQuaternionRotationNormal(normalAxis, angleY);
+		XMVECTOR quatY = XMQuaternionRotationNormal(rightAxis, angleY);
 
 		XMVECTOR newOri = XMVector3Rotate(m_focusDirection, quatY);
 
 
 		// Decides whether or not the next vertical Orientation is legal or not
-		if ((XMVectorAbs((XMVector3AngleBetweenVectors(newOri, m_up) - rad90)).m128_f32 <= rad85.m128_f32)) {
+		if (!(XMVectorAbs((XMVector3AngleBetweenVectors(newOri, m_up) - rad90)).m128_f32 <= rad85.m128_f32)) {
 			m_focusDirection = newOri;
 		}
 

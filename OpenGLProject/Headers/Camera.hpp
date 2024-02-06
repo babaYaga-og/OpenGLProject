@@ -47,5 +47,6 @@ public:
 	DirectX::XMVECTOR m_focusDirection;
 	float m_FOV = 60;
 	DirectX::XMVECTOR m_up = DirectX::XMVectorSet(0.f, 1.f, 0.f, 0.f);
+	DirectX::XMVECTOR m_right = DirectX::XMVectorSet(1.f, 0.f, 0.f, 0.f);
 };
 #endif
